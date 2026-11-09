@@ -41,7 +41,7 @@ ok('الاستنساخ يغيّر البكسلات',(await pg.evaluate(()=>[...L
 console.log('الإطارات (Mockups)');for(const t of['phone','laptop','browser']){await pg.evaluate(()=>{A.mock()});await pg.waitForTimeout(300);await pg.selectOption('#f_t',t);await pg.click('#ok');await pg.waitForTimeout(800);ok('إطار '+t,await pg.evaluate(()=>W>400&&H>260))}
 console.log('الجلسة: تصدير واستيراد');
 const[d]=await Promise.all([pg.waitForEvent('download'),pg.evaluate(()=>sesExp())]);const sf=path.join(TMP,'s.nxs');await d.saveAs(sf);const dn=await pg.evaluate(()=>docs.length);ok('ملف الجلسة',fs.statSync(sf).size>1000);
-const p2=await ctx.newPage();p2.on('pageerror',e=>errs.push('p2 '+e.message));await p2.goto(APP);await p2.waitForTimeout(700);await p2.evaluate(async b64=>{const bin=atob(b64),u=new Uint8Array(bin.length);for(let i=0;i<bin.length;i++)u[i]=bin.charCodeAt(i);await sesImp(new File([u],'s.nxs'))},fs.readFileSync(sf).toString('base64'));await p2.waitForTimeout(1500);ok('استيراد الجلسة يعيد كل المستندات',await p2.evaluate(()=>docs.length)==dn,[dn]);await p2.close();
+const p2=await ctx.newPage();p2.on('pageerror',e=>errs.push('p2 '+e.message));await p2.goto(APP);await p2.waitForTimeout(700);await p2.evaluate(async b64=>{const bin=atob(b64),u=new Uint8Array(bin.length);for(let i=0;i<bin.length;i++)u[i]=bin.charCodeAt(i);await sesImp(new File([u],'s.nxs'))},fs.readFileSync(sf).toString('base64'));await p2.waitForTimeout(1500);(()=>0)();const dn2=await p2.evaluate(()=>docs.length);ok('استيراد الجلسة يعيد كل المستندات',dn2==dn,[dn,dn2]);await p2.close();
 console.log('الدفعة الذكية بالمعاينة');
 await pg.evaluate(()=>{applyLook('تلقائي')});await pg.waitForTimeout(300);const[fc]=await Promise.all([pg.waitForEvent('filechooser'),pg.evaluate(()=>A.fbatch())]);await fc.setFiles([img,img]);await pg.waitForTimeout(900);ok('نافذة المعاينة',await pg.evaluate(()=>!!document.querySelector('#bdlg')));
 const px=()=>pg.evaluate(()=>[...document.querySelector('#bpv').getContext('2d').getImageData(50,50,1,1).data].join());const a100=await px();await pg.fill('#bin','0');await pg.dispatchEvent('#bin','input');await pg.waitForTimeout(200);const a0=await px();ok('الشدة 0 = الأصل والشدة 100 مختلفة',a0!=a100);
@@ -49,5 +49,20 @@ const[dz]=await Promise.all([pg.waitForEvent('download'),pg.click('#bgo')]);awai
 console.log('مشاركة ضبط برابط/QR');
 await pg.evaluate(()=>{const q=nl('x');q.type='adj';q.params={...D0,br:20,ct:15};q.name='ضبط: اختبار';L.push(q);act=L.length-1;push()});await pg.evaluate(()=>A.shpre());await pg.waitForTimeout(400);const link=await pg.inputValue('#qrl');ok('كود الضبط',/^nx[01]\./.test(link),link.slice(0,20));
 ok('فك الكود يعيد القيم',await pg.evaluate(async l=>{const o=await unpackPre(l);return o&&o.p.br==20&&o.p.ct==15},link));
+console.log('v2.7: المنظور الحي والقص');
+await pg.evaluate(()=>{act=0;pqStart()});await pg.evaluate(()=>{PQ[0]=[W*.25,H*.15];PQ[1]=[W*.75,H*.2];pqPreview()});await pg.waitForTimeout(300);ok('معاينة المنظور الحية',await pg.evaluate(()=>!!PQprev));const d0=await pg.evaluate(()=>[W,H]);await pg.evaluate(()=>pqApply());ok('قص تلقائي للحواف بعد التصحيح',await pg.evaluate(d=>W!=d[0]||H!=d[1],d0));
+console.log('v2.7: المحاذاة والإرشادات');
+await pg.evaluate(()=>{for(const [s,x,y] of [['A',50,40],['B',300,120],['C',120,300]]){const l=nl('نص');l.t={s,x,y,fs:40,font:'sans-serif',bold:false,ital:false,outl:false,shad:false,rtl:false,rot:0,col:'#fff',bg:'#000'};reText(l);L.push(l)}act=L.length-1;selS.clear();L.filter(l=>l.t).forEach(l=>selS.add(l))});
+await pg.evaluate(()=>alignLayers([...selS],'l','sel'));ok('محاذاة لليسار',await pg.evaluate(()=>new Set(L.filter(l=>l.t&&selS.has(l)).map(l=>Math.round(layBox(l)[0]))).size==1));
+await pg.evaluate(()=>{const l=L[act];l.t.x=W/2-l.t.w/2+4;l.t.y=100;reText(l);txSnap(l)});ok('الالتصاق بمنتصف الصورة',await pg.evaluate(()=>GUIDES&&Math.abs(GUIDES.x-W/2)<1));
+console.log('v2.7: الوصفات والصيغ');
+await pg.evaluate(()=>{applyLook('تلقائي');buildLooks()});ok('معلومات الضبط التلقائي',await pg.evaluate(()=>!!document.querySelector('#lka')));
+const[fc3]=await Promise.all([pg.waitForEvent('filechooser'),pg.evaluate(()=>A.fbatch())]);await fc3.setFiles([img]);await pg.waitForTimeout(700);await pg.fill('#brn','وصفة اختبار');await pg.click('#brsv');await pg.waitForTimeout(250);ok('حفظ وصفة',await pg.evaluate(async()=>(await brecLoad()).some(r=>r.n=='وصفة اختبار')));
+await pg.selectOption('#bfm','png');const[dz2]=await Promise.all([pg.waitForEvent('download'),pg.click('#bgo')]);const zf=path.join(TMP,'b2.zip');await dz2.saveAs(zf);ok('تصدير PNG',/\.png/.test(require('child_process').execSync('unzip -l '+zf).toString()));
+console.log('v2.7: نسخ/لصق الضبط والذاكرة');
+await pg.evaluate(()=>A.cpadj());await pg.waitForTimeout(250);await pg.evaluate(()=>{newDoc(200,200,'#888')});await pg.waitForTimeout(300);await pg.evaluate(()=>A.psadj());await pg.waitForTimeout(300);ok('لصق الضبط في مستند آخر',await pg.evaluate(()=>L.some(l=>l.type=='adj')));
+await pg.evaluate(()=>{memShown=0;memT=0;memDlg(5e8)});ok('نافذة الذاكرة',await pg.evaluate(()=>!!document.querySelector('#m3')));await pg.click('#m0');
+console.log('v2.7: الجولة والإعدادات');
+await pg.evaluate(()=>{S.smt=0;S.sm=0;sview='t';openSettings();sview='t';buildSettings()});await pg.waitForTimeout(250);await pg.evaluate(()=>document.querySelector('[data-a11y=sm]').click());await pg.waitForTimeout(250);ok('جولة الوضع المبسّط',await pg.evaluate(()=>[...document.querySelectorAll('h3')].some(h=>h.textContent=='الفلاتر')));
 console.log('أخطاء الصفحة');ok('لا أخطاء JS',errs.length==0,errs);
 await b.close();console.log(`\nالنتيجة: ${pass} نجح، ${fail} فشل`);process.exit(fail?1:0)})();
