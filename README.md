@@ -7,42 +7,32 @@ Developed by Ahmed Nx
 • فتح index.html مباشرة (file://) يكفي لتجربة المحرر والتحرير والحفظ.
 • لكن «التثبيت كتطبيق» و«العمل بدون إنترنت» (Service Worker) لا يعملان إلا من
   https:// أو http://localhost. لتجربتهما محلياً:
-      node tests/serve.js 8080      ← ثم افتح  http://localhost:8080/index.html
+      python3 -m http.server 8080   ← ثم افتح  http://localhost:8080/index.html  (من داخل المجلد)
 • أنواع الملفات:  .nx = مشروع واحد  ·  .nxs = جلسة كاملة (عدة مستندات) للنقل بين الأجهزة.
 
 طريقة التشغيل
 -------------
 1) للتجربة السريعة: افتح index.html في كروم/سفاري/إيدج.
 2) للتثبيت على الموبايل: استضف الملفات على https (أو خادم محلي) ثم «إضافة إلى الشاشة الرئيسية».
-   اترك sw.js و manifest.webmanifest و icon.svg بجانب index.html.
+   اترك sw.js و manifest.webmanifest وملفات الأيقونات (icon*.png و icon.svg) بجانب index.html.
+   آيفون (سفاري): زر المشاركة ← «إضافة إلى الشاشة الرئيسية» (يستخدم icon-180.png).
 
 محتويات الملف المضغوط
 ---------------------
 index.html                  التطبيق كله (ملف واحد). رقم الإصدار المركزي: NX_VER
 sw.js                       العمل بدون إنترنت (اسم الكاش مشتق من NX_VER تلقائياً)
 manifest.webmanifest        بيانات التثبيت
-icon.svg                    الأيقونة
+icon.svg                    الأيقونة (متجهة)
+icon-192.png / icon-512.png أيقونات PWA (أندرويد)
+icon-maskable-512.png       أيقونة قابلة للقص (maskable)
+icon-180.png                apple-touch-icon (آيفون)
 CHANGELOG.md                سجل التغييرات لكل إصدار
-tests/suite.js              اختبارات وظيفية آلية (تدعم DEVICE / APP_URL / WS_ENDPOINT)
-tests/visual.js             اختبار لقطات الشاشة + tests/baseline/ (المراجع)
-tests/pwa.js                اختبار التثبيت والكاش والعمل بدون اتصال
-tests/check-version.js      يتأكد أن التوثيق مطابق لرقم الإصدار
-tests/serve.js              خادم محلي صغير بدون مكتبات
-tests/release.sh            يشغّل كل ما سبق ثم يبني الـ zip فقط إذا نجح الكل
-tests/REMOTE_TESTING.md     الاختبار على أجهزة حقيقية (BrowserStack…) وأجهزة محاكاة
-tests/DEVICE_CHECKLIST.md   قائمة تجربة يدوية على جهاز لمس حقيقي (مع جدول نتائج)
 
-تشغيل الاختبارات (للمطوّر)
---------------------------
-المطلوب: Node.js + حزمة playwright + متصفح chromium (npm i -g playwright && npx playwright install chromium)
-   NODE_PATH=$(npm root -g) node tests/suite.js
-   NODE_PATH=$(npm root -g) node tests/visual.js            # مقارنة بالمرجع
-   NODE_PATH=$(npm root -g) node tests/visual.js --update   # بعد تغيير مقصود في الشكل
-   bash tests/release.sh [اسم-الـzip]                       # الكل + بناء الـ zip
+الفحص: من داخل التطبيق — الإعدادات ← «فحص التطبيق» (يختبر كل الوظائف ويعطيك تقريراً قابلاً للنسخ).
 
 حدود يجب معرفتها
 -----------------
-- لم يُجرَّب على جهاز لمس حقيقي بعد (الاختبارات تحاكي اللمس) — استخدم DEVICE_CHECKLIST.md.
+- لم يُجرَّب على جهاز لمس حقيقي بعد (الاختبارات تحاكي اللمس) — استخدم «فحص التطبيق» في الإعدادات.
 - الصور الكبيرة (≈12 ميجابكسل فأكثر) تستهلك ذاكرة كبيرة (الطبقات والأقنعة والسجل والنسخ المؤقتة
   تضاعف الرقم الخام عدة مرات). التطبيق يحذّر قبل الفتح/إضافة طبقة ويوفّر تفريغ الذاكرة، لكن
   قدرة الجهاز تختلف؛ جرّب صورك على جهازك.
