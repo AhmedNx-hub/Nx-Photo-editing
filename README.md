@@ -1,1 +1,0 @@
-# Nx-Photo-editing
