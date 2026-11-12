@@ -1,6 +1,6 @@
 // Service Worker — اسم الكاش يُشتق من رقم الإصدار المركزي (NX_VER في index.html) عبر ?v=
 const V=new URL(self.location.href).searchParams.get('v')||'dev',C='nx-'+V;
-const CORE=['./','index.html'],OPT=['manifest.webmanifest','icon.svg'];
+const CORE=['./','index.html'],OPT=['manifest.webmanifest','icon.svg','icon-192.png','icon-512.png','icon-maskable-512.png','icon-180.png'];
 self.addEventListener('install',e=>{e.waitUntil((async()=>{const c=await caches.open(C);
   // الملفات الأساسية إلزامية: لو فشل أحدها يفشل التثبيت بدل تثبيت نسخة ناقصة (والمتصفح يعيد المحاولة لاحقاً)
   await Promise.all(CORE.map(u=>c.add(u)));
